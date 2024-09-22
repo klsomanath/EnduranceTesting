@@ -27,6 +27,8 @@ window.state('zoomed') # For Windows
 #window.attributes('-zoomed', True) # For Linux
 window.title("System ON/OFF Controller")
 window.grid_propagate(True)
+filename="Log-"+str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+".txt"
+global ErrorLogFile
 ## ------------------------------------ Header Frame -----------------------------------------------------
 
 frame_header = tk.Frame(window, border=4, relief="ridge")
@@ -37,7 +39,7 @@ frame_header.grid_propagate(True)
 Header = tk.Label(frame_header,text="Nucon Aerospace Private Limited - Hyderabad",font=("Arial", 16,'bold'),foreground="Black")
 Header.grid(row=0,column=0,sticky="e")
 
-Header2 = tk.Label(frame_header,text="Endurance Testing",font=("Arial", 14,'bold'),foreground="Black")
+Header2 = tk.Label(frame_header,text="                                                      Endurance Testing",font=("Arial", 14,'bold'),foreground="Black")
 Header2.grid(row=1,column=0)
 
 img = Image.open("NuconLogo.png")
@@ -57,6 +59,8 @@ fault=[]
 
 ## --------------------- Frame 1 ---------------------------------------------------
 def systemOn():
+    global ErrorLogFile
+    ErrorLogFile = open(filename,"w")
     SystemOn.config(state=tk.DISABLED)
     CumCycleDownload.config(state=tk.DISABLED)
     global stop
@@ -65,6 +69,7 @@ def systemOn():
     disp_temp()
     return
 def checkPress(press1,press2,i):
+    global ErrorLogFile
     if (press1/i < 1 or press1/i > 5):
         Pass_Label = tk.Label(frame1, text="FAIL ",font=("Arial", 10,'bold'),foreground="RED")
         Pass_Label.grid(row=1,column=3)
@@ -75,6 +80,7 @@ def checkPress(press1,press2,i):
         info_box.insert(tk.END, f"Faulty Pressure Sensor 1 Please Check Wiring !!!\n\n")
         info_box.see(tk.END)
         info_box.configure(state="disabled")
+        ErrorLogFile.write(str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+" Faulty Pressure Sensor 1 Please Check Wiring !!!\n")
     if (press2/i < 1 or press2/i > 5):
         Pass_Label = tk.Label(frame1, text="FAIL ",font=("Arial", 10,'bold'),foreground="RED")
         Pass_Label.grid(row=1,column=3)
@@ -85,7 +91,9 @@ def checkPress(press1,press2,i):
         info_box.insert(tk.END, f"Faulty Pressure Sensor 2 Please Check Wiring !!!\n\n")
         info_box.see(tk.END)
         info_box.configure(state="disabled")
+        ErrorLogFile.write(str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+" Faulty Pressure Sensor 2 Please Check Wiring !!!\n")
 def checkTemp(temp1,temp2,i):
+    global ErrorLogFile
     if (temp1/i < 35 or temp1/i > 40):
         Pass_Label = tk.Label(frame1, text="FAIL ",font=("Arial", 10,'bold'),foreground="RED")
         Pass_Label.grid(row=1,column=3)
@@ -96,6 +104,7 @@ def checkTemp(temp1,temp2,i):
         info_box.insert(tk.END, f"Faulty Temparature Sensor 1 Please Check Wiring !!!\n\n")
         info_box.see(tk.END)
         info_box.configure(state="disabled")
+        ErrorLogFile.write(str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+" Faulty Temparature Sensor 1 Please Check Wiring !!!\n")
     if (temp2/i < 35 or temp2/i > 40):
         Pass_Label = tk.Label(frame1, text="FAIL ",font=("Arial", 10,'bold'),foreground="RED")
         Pass_Label.grid(row=1,column=3)
@@ -106,7 +115,9 @@ def checkTemp(temp1,temp2,i):
         info_box.insert(tk.END, f"Faulty Temparature Sensor 2 Please Check Wiring !!!\n\n")
         info_box.see(tk.END)
         info_box.configure(state="disabled")
+        ErrorLogFile.write(str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+" Faulty Temparature Sensor 2 Please Check Wiring !!!\n")
 def checkTempPress(temp13,press13,temp23,press23,i):
+    global ErrorLogFile
     if (temp13/i >= 35 and temp13/i <= 40) and (temp23/i >= 35 and temp23/i <= 40):
         if (press13/i >= 1 and press13/i <= 5) and (press23/i >= 1 and press23/i <= 5):
             enable=1
@@ -134,6 +145,7 @@ def checkTempPress(temp13,press13,temp23,press23,i):
         SystemOn.config(state=tk.DISABLED)
     return enable
 def checkDHT22(temp,humid):
+    global ErrorLogFile
     enable1=0
     if (temp >= 35 and temp <= 40) and (humid >= 50 and humid <= 70):
         enable1=1
@@ -150,8 +162,10 @@ def checkDHT22(temp,humid):
         CycleOn.config(state=tk.DISABLED)
         CycleOff.config(state=tk.DISABLED)
         SystemOn.config(state=tk.DISABLED)
+        ErrorLogFile.write(str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+" Faulty DHT22 Sensor Please Check Wiring\n")
     return enable1
 def disp_temp():
+    global ErrorLogFile
     enable=0
     temp11=temp13=temp23=press13=press23=0
     humid1=0
@@ -202,6 +216,7 @@ def disp_temp():
       info_box.insert(tk.END, f"Faulty DHT22 Sensor Please Check Wiring !!!\n\n")
       info_box.see(tk.END)
       info_box.configure(state="disabled")
+      ErrorLogFile.write(str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+" Faulty DHT22 Sensor Please Check Wiring !!! !!!\n")
       checkTemp(temp13,temp23,2)
       checkPress(press13,press23,2)
       SystemOff.config(state=tk.NORMAL)
@@ -226,6 +241,7 @@ def systemOff():
     info_box.config(state='normal')
     info_box.delete(1.0,END)
     info_box.config(state='disabled')
+    ErrorLogFile.close()
     Pass_Label = tk.Label(frame1, text="          ",font=("Arial", 10,'bold'))
     Pass_Label.grid(row=1,column=3)
     for i in range(2,8):
@@ -285,7 +301,6 @@ def cycleOn():
       sensor_data.append(Press.getPress2())
       sensor_data.append(Temp.getTemp2())
       temp,humidity=TempHumidity.getTempHumidity()
-      temp=54
       enable1=checkDHT22(temp,humidity)
       enable=checkTempPress(sensor_data[3],sensor_data[2],sensor_data[5],sensor_data[4],1)
       if enable == 0 or enable1 == 0:
@@ -314,9 +329,9 @@ def cycleOn():
     window.update()
     return
 def cycleOff():
-    for i in range(2,8):
-        Pass_Label = tk.Label(frame1, text="              ",font=("Arial", 10,'bold'),foreground="GREEN")
-        Pass_Label.grid(row=i,column=4)
+    # for i in range(2,8):
+    #     Pass_Label = tk.Label(frame1, text="              ",font=("Arial", 10,'bold'),foreground="GREEN")
+    #     Pass_Label.grid(row=i,column=4)
     pressure_label2 = tk.Label(frame1, text="                    ", font=("Arial", 10,'bold'),foreground="Black")
     pressure_label2.grid(row=3, column=5,sticky="w")
     ProgressLabel = tk.Label(frame1,text="                    ",height=1)
@@ -334,7 +349,7 @@ def cycleOff():
     txt=data[1]
     global downloadButton
     downloadButton = tk.Button(frame, text="Download",command=lambda: export_data(txt,end_txt))
-    downloadButton.grid(row=row_num, column=9,padx=68)
+    downloadButton.grid(row=row_num, column=9)
     stop = False
     CycleOn.config(state=tk.NORMAL)
     CycleOff.config(state=tk.DISABLED)
@@ -513,7 +528,7 @@ def disp_tempPress(sv013,sv02,now,press1,temp1,press2,temp2):
     if col_num==2:
         widths=20
     else:
-       widths = widthlist[col_num]+1
+       widths = widthlist[col_num]
     label = tk.Label(frame, text=data_item, font=("Arial", 12),width=widths)
     label.grid(row=row_num + 1, column=col_num,pady=10)
 
@@ -537,5 +552,5 @@ CumCycleDownload.grid(row=0, column=3)
 CumCycleDownload.config(state=tk.DISABLED)
 frame2.rowconfigure(list(range(2)), weight = 1, uniform="Silent_Creme")
 frame2.columnconfigure(list(range(4)), weight = 1, uniform="Silent_Creme")
-
+#ErrorLogFile.close()
 window.mainloop()
