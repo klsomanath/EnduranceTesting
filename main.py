@@ -132,6 +132,24 @@ def checkTempPress(temp13,press13,temp23,press23,i):
         CycleOff.config(state=tk.DISABLED)
         SystemOn.config(state=tk.DISABLED)
     return enable
+def checkDHT22(temp,humid):
+    enable1=0
+    if (temp >= 35 and temp <= 40) and (humid >= 50 and humid <= 70):
+        enable1=1
+    else:
+        Pass_Label = tk.Label(frame1, text="FAIL ",font=("Arial", 10,'bold'),foreground="RED")
+        Pass_Label.grid(row=2,column=4)
+        Pass_Label = tk.Label(frame1, text="FAIL ",font=("Arial", 10,'bold'),foreground="RED")
+        Pass_Label.grid(row=3,column=4)
+        info_box.configure(state="normal")
+        info_box.insert(tk.END, f"Faulty DHT22 Sensor Please Check Wiring !!!\n\n")
+        info_box.see(tk.END)
+        info_box.configure(state="disabled")
+        SystemOff.config(state=tk.NORMAL)
+        CycleOn.config(state=tk.DISABLED)
+        CycleOff.config(state=tk.DISABLED)
+        SystemOn.config(state=tk.DISABLED)
+    return enable1
 def disp_temp():
     enable=0
     temp11=temp13=temp23=press13=press23=0
@@ -160,10 +178,8 @@ def disp_temp():
         press13+=press1
         press2=Press.getPress2()
         press23+=press2
-
-        temp13=temp23=76
+        #temp13=temp23=76
         # press13=press23=6
-
         temp_label1 = tk.Label(frame1, text=temp1, font=("Arial",10,'bold'),foreground="Black")
         temp_label1.grid(row=4, column=3)
 
@@ -206,6 +222,14 @@ def disp_temp():
     window.update()
     return
 def systemOff():
+    info_box.config(state='normal')
+    info_box.delete(1.0,END)
+    info_box.config(state='disabled')
+    Pass_Label = tk.Label(frame1, text="          ",font=("Arial", 10,'bold'))
+    Pass_Label.grid(row=1,column=3)
+    for i in range(2,8):
+        Pass_Label = tk.Label(frame1, text="          ",font=("Arial", 10,'bold'))
+        Pass_Label.grid(row=i,column=4)
     global stop
     stop = True
     #window.update()
@@ -233,7 +257,7 @@ def cycleOn():
     #disp_tempPress()
     pressure_label2 = tk.Label(frame1, text="CYCLE ON", font=("Arial", 12,'bold'),foreground="Black")
     pressure_label2.grid(row=3, column=5,sticky="w")
-    fixed_size=(30,30)
+    fixed_size=(20,20)
     gif = Image.open("DownloadFile.gif")
     frames = [ImageTk.PhotoImage(frame.copy().resize(fixed_size, Image.Resampling.LANCZOS)) for frame in ImageSequence.Iterator(gif)]
     ProgressLabel = tk.Label(frame1)
@@ -259,11 +283,14 @@ def cycleOn():
       sensor_data.append(Temp.getTemp1())
       sensor_data.append(Press.getPress2())
       sensor_data.append(Temp.getTemp2())
+      temp,humidity=TempHumidity.getTempHumidity()
+      temp=54
+      enable1=checkDHT22(temp,humidity)
       enable=checkTempPress(sensor_data[3],sensor_data[2],sensor_data[5],sensor_data[4],1)
-      if enable == 0:
+      if enable == 0 or enable1 == 0:
         pressure_label2 = tk.Label(frame1, text="                    ", font=("Arial", 10,'bold'))
         pressure_label2.grid(row=3, column=5,sticky="w")
-        ProgressLabel1 = tk.Label(frame1,text="                    ",height=2)
+        ProgressLabel1 = tk.Label(frame1,text="                    ",height=1)
         ProgressLabel1.grid(row=3, column=6)
         return
       cycle_data=[]
@@ -286,6 +313,9 @@ def cycleOn():
     window.update()
     return
 def cycleOff():
+    for i in range(2,8):
+        Pass_Label = tk.Label(frame1, text="              ",font=("Arial", 10,'bold'),foreground="GREEN")
+        Pass_Label.grid(row=i,column=4)
     pressure_label2 = tk.Label(frame1, text="                    ", font=("Arial", 10,'bold'),foreground="Black")
     pressure_label2.grid(row=3, column=5,sticky="w")
     ProgressLabel = tk.Label(frame1,text="                    ",height=1)
@@ -403,7 +433,7 @@ frame1.grid(row=0, column=0)
 frame_body1_right = tk.Frame(frame_body, border=2)
 frame_body1_right.grid(row=0, column=1, sticky="nsew")
 
-info_box = tk.Text(frame_body1_right, state="disabled", width=60, height=16)
+info_box = tk.Text(frame_body1_right, state="disabled", width=80, height=16)
 info_box.pack()
 
 frame1.rowconfigure(list(range(9)), weight = 1, uniform="Silent_Creme")
@@ -413,11 +443,11 @@ SystemOn = tk.Button(frame1, text="System On",command=system_starter,font=("Aria
 SystemOn.grid(row=0, column=0)
 
 SystemOff = tk.Button(frame1, text="System Off",command=system_stopper,font=("Arial", 12,'bold'),width=10)
-SystemOff.grid(row=2, column=0)
+SystemOff.grid(row=1, column=0)
 SystemOff.config(state=tk.DISABLED)
 
 CycleOn = tk.Button(frame1, text="Cycle On",command=Cycle_starter,font=("Arial", 12,'bold'),width=10)
-CycleOn.grid(row=4, column=0)
+CycleOn.grid(row=2, column=0)
 CycleOn.config(state=tk.DISABLED)
 
 labels = ["POWER ON","PASS","SYSTEM ON","Env. Temparature","Env. Humidity","Temp. sensor - 1","Press. Sensor - 1","Temp. sensor - 2","Press. Sensor - 2"]
@@ -497,7 +527,7 @@ def disp_tempPress(sv013,sv02,now,press1,temp1,press2,temp2):
 frame2 = tk.Frame(window, border=4, relief="ridge")
 frame2.place(relx=0, rely=7/7.7, relwidth=1, relheight=1/4)
 
-CycleOff = tk.Button(frame2, text="Cycle Off",command=Cycle_stopper,background="red",foreground="WHITE",font=("Arial", 12,'bold'),width=10)
+CycleOff = tk.Button(frame2, text="Cycle Off",command=Cycle_stopper,font=("Arial", 12,'bold'),width=10)
 CycleOff.grid(row=0, column=0)
 CycleOff.config(state=tk.DISABLED)
 
