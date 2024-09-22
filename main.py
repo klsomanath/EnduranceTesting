@@ -23,8 +23,10 @@ flag = 0
 stop = False
 sensor_data = []
 window=tk.Tk()
-window.state('zoomed') # For Windows
-#window.attributes('-zoomed', True) # For Linux
+#window.state('zoomed') # For Windows
+#window.wm_attributes('-zoomed', True) # For Linux #gitignore
+w, h = window.winfo_screenwidth(), window.winfo_screenheight()
+window.geometry("%dx%d+0+0" % (w, h))
 window.title("System ON/OFF Controller")
 window.grid_propagate(True)
 filename="Log-"+str(datetime.datetime.now().strftime("%d-%b-%y %H:%M:%S"))+".txt"
