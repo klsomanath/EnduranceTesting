@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
-from ctypes import windll
-windll.shcore.SetProcessDpiAwareness(1)
+from ctypes import windll # For Windows Remove for Linux
+windll.shcore.SetProcessDpiAwareness(1) # For Windows Remove for Linux
 import time
 import TempHumidity
 import threading
@@ -23,7 +23,8 @@ flag = 0
 stop = False
 sensor_data = []
 window=tk.Tk()
-window.state('zoomed')
+window.state('zoomed') # For Windows
+#window.attributes('-zoomed', True) # For Linux
 window.title("System ON/OFF Controller")
 window.grid_propagate(True)
 ## ------------------------------------ Header Frame -----------------------------------------------------
